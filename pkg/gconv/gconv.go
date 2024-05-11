@@ -12,6 +12,7 @@ package gconv
 import (
 	"fmt"
 	"github.com/leiphp/unit-go-sdk/internal/json"
+	"github.com/leiphp/unit-go-sdk/os/gtime"
 	"math"
 	"reflect"
 	"strconv"
@@ -203,60 +204,6 @@ func doConvert(input doConvertInput) interface{} {
 		return Float64s(input.FromValue)
 	case "[]string":
 		return Strings(input.FromValue)
-
-	case "Time", "time.Time":
-		if len(input.Extra) > 0 {
-			return Time(input.FromValue, String(input.Extra[0]))
-		}
-		return Time(input.FromValue)
-	case "*time.Time":
-		var v interface{}
-		if len(input.Extra) > 0 {
-			v = Time(input.FromValue, String(input.Extra[0]))
-		} else {
-			if _, ok := input.FromValue.(*time.Time); ok {
-				return input.FromValue
-			}
-			v = Time(input.FromValue)
-		}
-		return &v
-
-	case "GTime", "gtime.Time":
-		if len(input.Extra) > 0 {
-			if v := GTime(input.FromValue, String(input.Extra[0])); v != nil {
-				return *v
-			} else {
-				return *gtime.New()
-			}
-		}
-		if v := GTime(input.FromValue); v != nil {
-			return *v
-		} else {
-			return *gtime.New()
-		}
-	case "*gtime.Time":
-		if len(input.Extra) > 0 {
-			if v := GTime(input.FromValue, String(input.Extra[0])); v != nil {
-				return v
-			} else {
-				return gtime.New()
-			}
-		}
-		if v := GTime(input.FromValue); v != nil {
-			return v
-		} else {
-			return gtime.New()
-		}
-
-	case "Duration", "time.Duration":
-		return Duration(input.FromValue)
-	case "*time.Duration":
-		if _, ok := input.FromValue.(*time.Duration); ok {
-			return input.FromValue
-		}
-		v := Duration(input.FromValue)
-		return &v
-
 	case "map[string]string":
 		return MapStrStr(input.FromValue)
 
@@ -401,26 +348,6 @@ func String(any interface{}) string {
 		return value
 	case []byte:
 		return string(value)
-	case time.Time:
-		if value.IsZero() {
-			return ""
-		}
-		return value.String()
-	case *time.Time:
-		if value == nil {
-			return ""
-		}
-		return value.String()
-	case gtime.Time:
-		if value.IsZero() {
-			return ""
-		}
-		return value.String()
-	case *gtime.Time:
-		if value == nil {
-			return ""
-		}
-		return value.String()
 	default:
 		// Empty checks.
 		if value == nil {
